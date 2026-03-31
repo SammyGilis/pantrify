@@ -22,7 +22,7 @@ export function DrinksPage() {
   );
 
   const toggleGoal = (g: string) => setFilters(f => ({
-    ...f, goals: f.goals.includes(g) ? f.goals.filter(x => x !== g) : Array.from(f.goals, g),
+    ...f, goals: f.goals.includes(g) ? f.goals.filter(x => x !== g) : [...f.goals, g],
   }));
 
   const findDrinks = async () => {
