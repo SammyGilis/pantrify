@@ -23,9 +23,9 @@ export function HistoryPage({ cookedRecipes, onClear }: Props) {
   const loadGrocery = async () => {
     setGroceryLoading(true);
     try {
-      const cuisines = [...new Set(cookedRecipes.map(r => r.cuisine).filter(Boolean))];
-      const meals = [...new Set(cookedRecipes.map(r => r.meal).filter(Boolean))];
-      const diets = [...new Set(cookedRecipes.flatMap(r => r.diet || []))];
+      const cuisines = Array.from(new Set(cookedRecipes.map(r => r.cuisine).filter(Boolean)));
+      const meals = Array.from(new Set(cookedRecipes.map(r => r.meal).filter(Boolean)));
+      const diets = Array.from(new Set(cookedRecipes.flatMap(r => r.diet || [])));
       const allIngs = cookedRecipes.flatMap(r => (r.ingredients || []).map(i => parseIngName(i)));
       const titles = cookedRecipes.map(r => r.title).slice(0, 10);
 
@@ -35,7 +35,7 @@ Recipes cooked: ${titles.join(', ')}
 Cuisines: ${cuisines.join(', ') || 'varied'}
 Meal types: ${meals.join(', ') || 'varied'}
 Dietary patterns: ${diets.join(', ') || 'none'}
-Ingredients used: ${[...new Set(allIngs)].slice(0, 40).join(', ')}
+Ingredients used: ${Array.from(new Set(allIngs)).slice(0, 40).join(', ')}
 
 Focus on: versatile staples, ingredients across multiple cuisines, pantry gaps, frequently used items.
 
