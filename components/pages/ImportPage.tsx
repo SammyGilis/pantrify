@@ -105,9 +105,9 @@ export function ImportPage({ onCooked }: Props) {
 
       let prompt: string;
       if (pageContent.length > 40 && platform.type === 'web') {
-        prompt = `Extract the exact recipe from this page.\n\nURL: ${url}\n\nCONTENT:\n${pageContent}\n\nReturn ONLY this JSON (no markdown):\n${sch}\n\nEvery ingredient must have an exact measurement. Calculate macros accurately.`;
+        prompt = `Extract the exact recipe from this page.\n\nURL: ${url}\n\nCONTENT:\n${pageContent}\n\nReturn ONLY this JSON (no markdown):\n${sch}\n\nRULES:\n- Every ingredient MUST have an exact measurement.\n- Calculate macros accurately: look up the nutritional value of each ingredient at the exact quantity listed, sum them all up, then divide by servings. Spices, salt, pepper, herbs = 0 calories. Cross-check: calories must ≈ (protein×4)+(carbs×4)+(fat×9). Never use placeholder macro values.`;
       } else {
-        prompt = `Find the exact recipe from this ${platform.name} video: ${url}${creator ? ` by @${creator}` : ''}.${pageContent ? `\n\nContent found: ${pageContent}` : ''}\n\nSearch for the specific video, creator, and recipe. Find the actual dish — do NOT substitute a similar one.\n\nReturn ONLY this JSON (no markdown):\n${sch}\n\nCRITICAL: Every ingredient MUST have an exact measurement. Calculate macros accurately.`;
+        prompt = `Find the exact recipe from this ${platform.name} video: ${url}${creator ? ` by @${creator}` : ''}.${pageContent ? `\n\nContent found: ${pageContent}` : ''}\n\nSearch for the specific video, creator, and recipe. Find the actual dish — do NOT substitute a similar one.\n\nReturn ONLY this JSON (no markdown):\n${sch}\n\nRULES:\n- Every ingredient MUST have an exact measurement. If measurements aren't shown in the video, estimate realistic amounts for the dish.\n- Calculate macros accurately: look up the nutritional value of each ingredient at the exact quantity listed, sum them all up, then divide by servings. Spices, salt, pepper, herbs = 0 calories. Cross-check: calories must ≈ (protein×4)+(carbs×4)+(fat×9). Never use placeholder macro values.`;
       }
 
       const useSearch = platform.type !== 'web' || pageContent.length < 40;
