@@ -94,7 +94,7 @@ Return ONLY a valid JSON array, no markdown:
                 <div className="history-card-meta">
                   <div className="history-card-meta-left">
                     <span>⏱ {r.time}</span>
-                    <span>🏷 {r.cuisine || r.type} {r.meal ? `• ${r.meal}` : ''}</span>
+                    <span>🏷 {r.cuisine || ""} {r.meal ? `• ${r.meal}` : ''}</span>
                   </div>
                   {r.cookedDate && <span className="cooked-date">Cooked {r.cookedDate}</span>}
                 </div>
