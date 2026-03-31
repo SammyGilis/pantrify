@@ -99,8 +99,14 @@ export function DiscoverPage({ onCooked }: Props) {
     e.target.value = '';
   };
 
+  const [ingError, setIngError] = useState(false);
+
   const findRecipes = async () => {
-    if (!ingredients.length) return;
+    if (!ingredients.length) {
+      setIngError(true);
+      setTimeout(() => setIngError(false), 3000);
+      return;
+    }
     setLoading(true); setError(''); setPaywalled(false); setRecipes([]);
 
     const servings = filters.servings ?? 4;
@@ -293,11 +299,25 @@ Return ONLY a valid JSON array, no markdown:
       </div>
 
       <div className="find-btn-wrap">
-        <button className="find-btn" onClick={findRecipes} disabled={loading || !ingredients.length}>
+        <button className="find-btn" onClick={findRecipes} disabled={loading}>
           {loading ? '⏳ Searching…' : '🍽 Find Delicious Meals'}
         </button>
         <button className="clear-filters-btn" onClick={clearFilters}>Clear Filters</button>
       </div>
+
+      {/* No ingredients popup */}
+      {ingError && (
+        <div style={{
+          position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+          background: '#1f2937', color: 'white', borderRadius: 12,
+          padding: '14px 24px', fontSize: 14, fontWeight: 600,
+          zIndex: 9999, display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)', whiteSpace: 'nowrap' as const,
+          animation: 'fadeIn 0.2s ease',
+        }}>
+          🥕 Add at least one ingredient first!
+        </div>
+      )}
 
       {paywalled && (
         <div style={{ maxWidth: 700, margin: '0 auto 16px', padding: '0 24px' }}>

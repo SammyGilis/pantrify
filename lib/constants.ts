@@ -1,18 +1,39 @@
 export const BANNED_WORDS = [
+  // Body parts (sexual/inappropriate)
   'penis','penises','cock','cocks','dick','dicks','prick','pricks',
   'phallus','boner','erection','dong','dongs','schlong','member',
-  'johnson','willy','willies','wang','wangs','todger','dingus','love muscle',
+  'johnson','willy','willies','wang','wangs','todger','dingus',
   'vagina','vaginas','pussy','pussies','cunt','cunts','vulva','snatch','muff',
-  'twat','cooch','cooter','vajayjay','lady parts','bearded clam','beef curtains',
-  'axe wound','meat curtains','whisker biscuit','punani','vagin','coochie',
-  'testicles','testis','testes','scrotum','nads','gonads','ballsack','cojones',
+  'twat','cooch','cooter','vajayjay','punani','coochie',
+  'testicles','testis','testes','scrotum','nads','gonads','ballsack','cojones','balls',
   'boobs','boob','tits','tit','titties','nipple','nipples','jugs','hooters',
-  'knockers','bazongas','fun bags','honkers','ta-tas','chesticles','mammaries',
-  'buttocks','anus','sphincter','bunghole','asscrack','taint','perineum',
-  'gooch','poop chute','keister','wazoo',
-  'cum','semen','jizz','spunk','creampie','queef',
+  'knockers','mammaries','buttocks','anus','sphincter','bunghole','asscrack','taint',
+  'cum','semen','jizz','spunk','queef',
   'blowjob','handjob','rimjob','cumshot','gangbang','orgy','threesome',
-  'fisting','double penetration','anal',
+  'fisting','anal',
+
+  // Curse words
+  'fuck','fucking','fucked','fucker','fucks','f*ck','fck',
+  'shit','shits','shitting','shitty','bullshit','sh*t',
+  'ass','asses','asshole','assholes','jackass','badass','smartass','dumbass',
+  'bitch','bitches','bitching','son of a bitch',
+  'bastard','bastards',
+  'damn','goddamn','god damn',
+  'hell','what the hell',
+  'crap','crappy',
+  'whore','whores','slut','sluts','skank','skanks','hoe','hoes',
+  'piss','pissed','pissing',
+
+  // Racial slurs (common ones — intentionally not spelling them all out fully)
+  'nigger','niggers','nigga','niggas',
+  'chink','chinks','gook','gooks','jap','japs',
+  'spic','spics','beaner','beaners','wetback','wetbacks',
+  'kike','kikes','hymie',
+  'cracker','crackers','honky','honkies',
+  'towelhead','raghead','sandnigger',
+  'tranny','trannies',
+  'retard','retards','retarded',
+  'faggot','faggots','fag','fags','dyke','dykes',
 ];
 
 export const FOOD_WHITELIST = [
@@ -30,6 +51,8 @@ export const FOOD_WHITELIST = [
   'hotdog','hot dog','corndog',
   'wood ear mushroom','butt','pork butt','boston butt','butter','buttermilk',
   'farfalle','fanny adams','dong quai','wiener schnitzel','schnitzel',
+  'damson','damn good','crappie','sea bass','bass',
+  'assam tea','assam','hell clam','spiced',
 ];
 
 export const INGREDIENT_CATS: Record<string, string> = {

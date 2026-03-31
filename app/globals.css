@@ -638,3 +638,5 @@ nav {
 
 /* nav-right spacing */
 .nav-right { display: flex; align-items: center; gap: 10px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
