@@ -10,7 +10,7 @@ const PAID_ONLY_FEATURES = ['drinks', 'grocery'];
 const usageMap = new Map<string, { count: number; date: string }>();
 
 function getTodayStr() {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date(); const mon = new Date(d); mon.setDate(d.getDate() - d.getDay()); return mon.toISOString().split('T')[0];
 }
 
 export async function POST(req: NextRequest) {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'free_limit_reached',
-          message: `You've used your ${FREE_DAILY_LIMIT} free searches today. Upgrade to Pro for unlimited recipes, drinks, and more.`,
+          message: `You've used your ${FREE_DAILY_LIMIT} free searches this week. Upgrade to Pro for unlimited recipes, drinks, and more.`,
         },
         { status: 402 }
       );
