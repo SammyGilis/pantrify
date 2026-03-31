@@ -5,8 +5,8 @@ import { getUserSubscriptionStatus } from '@/lib/stripe';
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// Free tier limits
 const FREE_DAILY_LIMIT = 3;
+const PAID_ONLY_FEATURES = ['drinks', 'grocery'];
 const usageMap = new Map<string, { count: number; date: string }>();
 
 function getTodayStr() {
@@ -17,11 +17,26 @@ export async function POST(req: NextRequest) {
   const { userId } = auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // Check subscription
   const subStatus = await getUserSubscriptionStatus(userId);
   const isPaid = subStatus === 'active';
 
-  // Enforce free tier limit
+  const body = await req.json();
+  const { messages, max_tokens = 8000, tools, feature } = body;
+
+  // Drinks and grocery are paid-only
+  if (PAID_ONLY_FEATURES.includes(feature) && !isPaid) {
+    return NextResponse.json(
+      {
+        error: 'paid_feature',
+        message: feature === 'drinks'
+          ? 'Drink recipes are a Pro feature. Upgrade to unlock drinks, smart grocery, and unlimited searches.'
+          : 'Smart Grocery is a Pro feature. Upgrade to unlock it along with drinks and unlimited searches.',
+      },
+      { status: 402 }
+    );
+  }
+
+  // Free tier daily limit for recipes + imports
   if (!isPaid) {
     const today = getTodayStr();
     const usage = usageMap.get(userId);
@@ -29,7 +44,10 @@ export async function POST(req: NextRequest) {
 
     if (todayCount >= FREE_DAILY_LIMIT) {
       return NextResponse.json(
-        { error: 'free_limit_reached', message: `Free plan allows ${FREE_DAILY_LIMIT} searches per day. Upgrade for unlimited access.` },
+        {
+          error: 'free_limit_reached',
+          message: `You've used your ${FREE_DAILY_LIMIT} free searches today. Upgrade to Pro for unlimited recipes, drinks, and more.`,
+        },
         { status: 402 }
       );
     }
@@ -38,9 +56,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
-    const { messages, max_tokens = 8000, tools } = body;
-
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens,

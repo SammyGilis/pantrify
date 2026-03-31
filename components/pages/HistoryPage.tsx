@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Recipe } from '@/lib/types';
 import { callClaude } from '@/hooks/useClaude';
+import { useSubscription } from '@/hooks/useSubscription';
 import { categorize, parseIngName } from '@/lib/utils';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 interface GroceryItem { name: string; category: string; reason: string; }
 
 export function HistoryPage({ cookedRecipes, onClear }: Props) {
+  const { isPaid, startCheckout } = useSubscription();
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [groceryLoading, setGroceryLoading] = useState(false);
 
@@ -23,9 +25,9 @@ export function HistoryPage({ cookedRecipes, onClear }: Props) {
   const loadGrocery = async () => {
     setGroceryLoading(true);
     try {
-      const cuisines = Array.from(new Set(cookedRecipes.map(r => r.cuisine).filter(Boolean)));
-      const meals = Array.from(new Set(cookedRecipes.map(r => r.meal).filter(Boolean)));
-      const diets = Array.from(new Set(cookedRecipes.flatMap(r => r.diet || [])));
+      const cuisines = [...new Set(cookedRecipes.map(r => r.cuisine).filter(Boolean))];
+      const meals = [...new Set(cookedRecipes.map(r => r.meal).filter(Boolean))];
+      const diets = [...new Set(cookedRecipes.flatMap(r => r.diet || []))];
       const allIngs = cookedRecipes.flatMap(r => (r.ingredients || []).map(i => parseIngName(i)));
       const titles = cookedRecipes.map(r => r.title).slice(0, 10);
 
@@ -35,14 +37,14 @@ Recipes cooked: ${titles.join(', ')}
 Cuisines: ${cuisines.join(', ') || 'varied'}
 Meal types: ${meals.join(', ') || 'varied'}
 Dietary patterns: ${diets.join(', ') || 'none'}
-Ingredients used: ${Array.from(new Set(allIngs)).slice(0, 40).join(', ')}
+Ingredients used: ${[...new Set(allIngs)].slice(0, 40).join(', ')}
 
 Focus on: versatile staples, ingredients across multiple cuisines, pantry gaps, frequently used items.
 
 Return ONLY a valid JSON array, no markdown:
 [{"name":"Ingredient","category":"PRODUCE|PANTRY|PROTEIN|DAIRY|SPICE|GRAIN|CONDIMENT|SEAFOOD|MEAT","reason":"One concise sentence max 15 words."}]`;
 
-      const data = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 1000 });
+      const data = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 1000, feature: 'grocery' });
       const text = (data.content || []).map((c: { text?: string }) => c.text || '').join('');
       const clean = text.replace(/```json|```/g, '').trim();
       const arr = JSON.parse(clean.match(/\[[\s\S]*\]/)![0]);
@@ -94,7 +96,7 @@ Return ONLY a valid JSON array, no markdown:
                 <div className="history-card-meta">
                   <div className="history-card-meta-left">
                     <span>⏱ {r.time}</span>
-                    <span>🏷 {r.cuisine || ""} {r.meal ? `• ${r.meal}` : ''}</span>
+                    <span>🏷 {r.cuisine || r.type} {r.meal ? `• ${r.meal}` : ''}</span>
                   </div>
                   {r.cookedDate && <span className="cooked-date">Cooked {r.cookedDate}</span>}
                 </div>
@@ -114,7 +116,16 @@ Return ONLY a valid JSON array, no markdown:
           </div>
         </div>
 
-        {cookedRecipes.length < 5 ? (
+        {!isPaid ? (
+          <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <div style={{ fontSize: 28, marginBottom: 10 }}>🛒</div>
+            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Smart Grocery is a Pro Feature</div>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.5 }}>Upgrade to Pro to unlock AI-curated grocery lists, drink recipes, and unlimited searches.</p>
+            <button onClick={startCheckout} style={{ background: 'var(--green-dark)', color: 'white', border: 'none', borderRadius: 99, padding: '10px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              ✦ Upgrade to Pro
+            </button>
+          </div>
+        ) : cookedRecipes.length < 5 ? (
           <div className="grocery-empty">
             Cook <strong>{remaining} more recipe{remaining !== 1 ? 's' : ''}</strong> to unlock your Smart Grocery list.
             <span style={{ fontSize: 11, marginTop: 6, display: 'block', color: 'var(--text-light)' }}>{cookedRecipes.length}/5 recipes cooked</span>

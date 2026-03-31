@@ -7,7 +7,7 @@ export interface ClaudeMessage {
 
 export async function callClaude(
   messages: ClaudeMessage[],
-  options: { maxTokens?: number; useSearch?: boolean } = {}
+  options: { maxTokens?: number; useSearch?: boolean; feature?: string } = {}
 ) {
   const res = await fetch('/api/claude', {
     method: 'POST',
@@ -15,6 +15,7 @@ export async function callClaude(
     body: JSON.stringify({
       messages,
       max_tokens: options.maxTokens ?? 8000,
+      feature: options.feature ?? 'recipes',
       tools: options.useSearch
         ? [{ type: 'web_search_20250305', name: 'web_search' }]
         : undefined,
@@ -23,8 +24,10 @@ export async function callClaude(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    // Re-export the structured error so callers can check err.error === 'free_limit_reached'
-    throw Object.assign(new Error(err.message || `API error ${res.status}`), { code: err.error, status: res.status });
+    throw Object.assign(new Error(err.message || `API error ${res.status}`), {
+      code: err.error,
+      status: res.status,
+    });
   }
 
   return res.json();

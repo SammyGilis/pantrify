@@ -6,8 +6,10 @@ import { PaywallBanner } from '@/components/PaywallBanner';
 import { callClaude } from '@/hooks/useClaude';
 import { Drink, DrinkFilters } from '@/lib/types';
 import { extractJSONArray } from '@/lib/utils';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export function DrinksPage() {
+  const { isPaid, startCheckout } = useSubscription();
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [filters, setFilters] = useState<DrinkFilters>({ goals: [] });
   const [goalsOpen, setGoalsOpen] = useState(false);
@@ -52,7 +54,7 @@ Return ONLY a valid JSON array, no markdown:
 [{"title":"Drink Name","type":"Alcoholic|Non-Alcoholic","time":"5 min","timeNum":5,"desc":"One sentence.","goals":["LOW CALORIE"],"matchingIngredients":["lime"],"ingredients":["60ml rum","1 lime, juiced","1 cup soda water"],"steps":["Step 1.","Step 2."]}]`;
 
     try {
-      const data = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 6000 });
+      const data = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 6000, feature: 'drinks' });
       const text = (data.content || []).map((c: { text?: string }) => c.text || '').join('');
       const arr = extractJSONArray(text);
       if (!arr) throw new Error('No drinks found');
@@ -71,7 +73,7 @@ Return ONLY a valid JSON array, no markdown:
         .sort((a: Drink, b: Drink) => (b.matchCount! - a.matchCount!));
       setDrinks(enriched);
     } catch (err: unknown) {
-      if (err instanceof Error && (err as Error & { code?: string }).code === 'free_limit_reached') setPaywalled(true);
+      const code = (err as Error & { code?: string }).code; if (err instanceof Error && (code === 'free_limit_reached' || code === 'paid_feature')) setPaywalled(true);
       else setError(err instanceof Error ? err.message : 'Something went wrong.');
     } finally { setLoading(false); }
   };
@@ -87,6 +89,20 @@ Return ONLY a valid JSON array, no markdown:
         </div>
       </div>
 
+      {!isPaid && (
+        <div style={{ maxWidth: 640, margin: '0 auto 24px', padding: '0 24px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', borderRadius: 16, padding: '28px 24px', textAlign: 'center', color: 'white' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🍹</div>
+            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Drinks are a Pro Feature</div>
+            <p style={{ fontSize: 14, opacity: 0.85, marginBottom: 20, lineHeight: 1.5 }}>Upgrade to Pantrify Pro to generate cocktails, mocktails and healthy drinks — plus unlimited recipe searches and Smart Grocery.</p>
+            <button onClick={startCheckout} style={{ background: 'white', color: '#6d28d9', border: 'none', borderRadius: 99, padding: '12px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              ✦ Upgrade to Pro
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isPaid && (
       <div className="search-section">
         <IngredientInput ingredients={ingredients} onChange={setIngredients} />
       </div>
@@ -172,6 +188,8 @@ Return ONLY a valid JSON array, no markdown:
             ))}
           </div>
         </div>
+      )}
+
       )}
 
       {selectedDrink && (

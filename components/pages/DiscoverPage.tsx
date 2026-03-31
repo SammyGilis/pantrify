@@ -91,7 +91,7 @@ Return ONLY a valid JSON array, no markdown:
 [{"title":"Name","cuisine":"Italian","meal":"Dinner","difficulty":"Easy","time":"25 min","timeNum":25,"servings":${servings},"desc":"One sentence.","diet":["VEGETARIAN"],"source":"@handle","sourceType":"instagram","macros":{"calories":520,"protein":24,"carbs":68,"fat":14},"matchingIngredients":["garlic"],"ingredients":["3 cloves garlic, minced","200g pasta","1 tbsp olive oil"],"steps":["Step 1.","Step 2."]}]`;
 
     try {
-      const data = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 8000 });
+      const data = await callClaude([{ role: 'user', content: prompt }], { maxTokens: 8000, feature: 'recipes' });
       const text = (data.content || []).map((c: { text?: string }) => c.text || '').join('');
       const arr = extractJSONArray(text);
       if (!arr) throw new Error('No recipes found in response');

@@ -113,7 +113,7 @@ export function ImportPage({ onCooked }: Props) {
       const useSearch = platform.type !== 'web' || pageContent.length < 40;
       const messages: { role: 'user' | 'assistant'; content: string | unknown[] }[] = [{ role: 'user', content: prompt }];
 
-      let data = await callClaude(messages, { maxTokens: 2500, useSearch });
+      let data = await callClaude(messages, { maxTokens: 2500, useSearch, feature: 'import' });
       let finalText = '';
 
       // Handle web_search tool_use loop
@@ -127,7 +127,7 @@ export function ImportPage({ onCooked }: Props) {
           .filter((c: { type: string }) => c.type === 'tool_use')
           .map((tb: { id: string }) => ({ type: 'tool_result', tool_use_id: tb.id, content: 'Search complete. Return the exact recipe JSON with measurements for every ingredient.' }));
         messages.push({ role: 'user', content: toolResults });
-        data = await callClaude(messages, { maxTokens: 2500, useSearch: true });
+        data = await callClaude(messages, { maxTokens: 2500, useSearch: true, feature: 'import' });
       }
 
       finalText = (data.content || []).filter((c: { type: string }) => c.type === 'text').map((c: { text?: string }) => c.text ?? '').join('');
