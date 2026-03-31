@@ -185,26 +185,73 @@ export function ImportPage({ onCooked }: Props) {
         )}
 
         {result && !loading && (
-          <div className="import-result-card">
-            <div className="import-result-tags">
-              <span className="import-result-tag">{platform.icon} {platform.name}</span>
-              {result.cuisine && <span className="import-result-tag">{result.cuisine}</span>}
-              {result.meal && <span className="import-result-tag">{result.meal}</span>}
+          <div style={{ maxWidth: 640, margin: '0 auto' }}>
+            {/* Header */}
+            <div className="import-result-card">
+              <div className="import-result-tags">
+                <span className="import-result-tag">{platform.icon} {platform.name}</span>
+                {result.cuisine && <span className="import-result-tag">{result.cuisine}</span>}
+                {result.meal && <span className="import-result-tag">{result.meal}</span>}
+                {result.diet && result.diet.map((d: string) => <span key={d} className="import-result-tag">{d}</span>)}
+              </div>
+              <div className="import-result-title">{result.title}</div>
+              <div className="import-result-meta">
+                {result.time && <span>⏱ {result.time}</span>}
+                {result.servings && <span>🍽 {result.servings} servings</span>}
+                {result.ingredients && <span>📋 {result.ingredients.length} ingredients</span>}
+              </div>
+              <p className="import-result-desc">{result.desc}</p>
+              {savedMsg && <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 600, marginBottom: 10 }}>✓ Recipe saved to history!</div>}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button className="import-save-btn" onClick={() => { onCooked({ ...result, id: `import-${Date.now()}` }); setSavedMsg(true); }}>
+                  ✓ Save to History
+                </button>
+                <button className="import-clear-btn" onClick={() => { setResult(null); setUrl(''); setSavedMsg(false); }}>Clear</button>
+              </div>
             </div>
-            <div className="import-result-title">{result.title}</div>
-            <div className="import-result-meta">
-              {result.time && <span>⏱ {result.time}</span>}
-              {result.servings && <span>🍽 {result.servings} servings</span>}
-              {result.ingredients && <span>📋 {result.ingredients.length} ingredients</span>}
-            </div>
-            <p className="import-result-desc">{result.desc}</p>
-            {savedMsg && <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 600, marginBottom: 10 }}>✓ Recipe saved to history!</div>}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button className="import-save-btn" onClick={() => { onCooked({ ...result, id: `import-${Date.now()}` }); setSavedMsg(true); }}>
-                ✓ Save to History
-              </button>
-              <button className="import-clear-btn" onClick={() => { setResult(null); setUrl(''); setSavedMsg(false); }}>Clear</button>
-            </div>
+
+            {/* Macros */}
+            {result.macros && (
+              <div className="macro-bar" style={{ margin: '12px 0' }}>
+                <div className="macro-item">
+                  <div className="macro-val">{Math.round(result.macros.calories)}</div>
+                  <div className="macro-label">Calories<br /><span style={{ fontSize: 9, color: 'var(--text-light)' }}>per serving</span></div>
+                </div>
+                <div className="macro-divider" />
+                <div className="macro-item"><div className="macro-val">{Math.round(result.macros.protein)}g</div><div className="macro-label">Protein</div></div>
+                <div className="macro-divider" />
+                <div className="macro-item"><div className="macro-val">{Math.round(result.macros.carbs)}g</div><div className="macro-label">Carbs</div></div>
+                <div className="macro-divider" />
+                <div className="macro-item"><div className="macro-val">{Math.round(result.macros.fat)}g</div><div className="macro-label">Fat</div></div>
+              </div>
+            )}
+
+            {/* Ingredients */}
+            {result.ingredients && result.ingredients.length > 0 && (
+              <div style={{ background: 'var(--white)', borderRadius: 16, padding: '20px 24px', marginBottom: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                <div className="modal-section-title" style={{ marginTop: 0 }}>🧑 Ingredients</div>
+                <ul className="modal-ingredients">
+                  {result.ingredients.map((ing: string, i: number) => (
+                    <li key={i}>{ing}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Steps */}
+            {result.steps && result.steps.length > 0 && (
+              <div style={{ background: 'var(--white)', borderRadius: 16, padding: '20px 24px', marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                <div className="modal-section-title" style={{ marginTop: 0 }}>🌿 Instructions</div>
+                <div className="modal-steps">
+                  {result.steps.map((step: string, i: number) => (
+                    <div key={i} className="modal-step">
+                      <div className="modal-step-num">{i + 1}</div>
+                      <div>{step}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
