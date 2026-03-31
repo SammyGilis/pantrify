@@ -39,7 +39,7 @@ export function DiscoverPage({ onCooked }: Props) {
   const toggleDiet = (d: string) => {
     setFilters(f => ({
       ...f,
-      diets: f.diets.includes(d) ? f.diets.filter(x => x !== d) : Array.from(f.diets, d),
+      diets: f.diets.includes(d) ? f.diets.filter(x => x !== d) : [...f.diets, d],
     }));
   };
 
