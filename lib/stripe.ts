@@ -4,22 +4,40 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
 });
 
-export async function getUserSubscriptionStatus(userId: string): Promise<'active' | 'inactive'> {
+export async function getUserSubscriptionStatus(userId: string, userEmail?: string): Promise<'active' | 'inactive'> {
   try {
-    // Search for customer by clerk userId in metadata
-    const customers = await stripe.customers.search({
+    // First try finding by clerkUserId metadata
+    const byMeta = await stripe.customers.search({
       query: `metadata['clerkUserId']:'${userId}'`,
     });
 
-    if (customers.data.length === 0) return 'inactive';
+    if (byMeta.data.length > 0) {
+      const subs = await stripe.subscriptions.list({
+        customer: byMeta.data[0].id,
+        status: 'active',
+      });
+      if (subs.data.length > 0) return 'active';
+    }
 
-    const customer = customers.data[0];
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customer.id,
-      status: 'active',
-    });
+    // Fallback: find by email and check if they have an active subscription
+    if (userEmail) {
+      const byEmail = await stripe.customers.list({ email: userEmail, limit: 5 });
+      for (const customer of byEmail.data) {
+        const subs = await stripe.subscriptions.list({
+          customer: customer.id,
+          status: 'active',
+        });
+        if (subs.data.length > 0) {
+          // Auto-tag this customer with their clerkUserId for future lookups
+          await stripe.customers.update(customer.id, {
+            metadata: { clerkUserId: userId },
+          });
+          return 'active';
+        }
+      }
+    }
 
-    return subscriptions.data.length > 0 ? 'active' : 'inactive';
+    return 'inactive';
   } catch {
     return 'inactive';
   }

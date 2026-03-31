@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { getUserSubscriptionStatus } from '@/lib/stripe';
@@ -9,15 +9,21 @@ const FREE_DAILY_LIMIT = 3;
 const PAID_ONLY_FEATURES = ['drinks', 'grocery'];
 const usageMap = new Map<string, { count: number; date: string }>();
 
-function getTodayStr() {
-  const d = new Date(); const mon = new Date(d); mon.setDate(d.getDate() - d.getDay()); return mon.toISOString().split('T')[0];
+function getThisWeekStr() {
+  const d = new Date();
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - d.getDay());
+  return mon.toISOString().split('T')[0];
 }
 
 export async function POST(req: NextRequest) {
   const { userId } = auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const subStatus = await getUserSubscriptionStatus(userId);
+  const user = await currentUser();
+  const email = user?.emailAddresses[0]?.emailAddress;
+
+  const subStatus = await getUserSubscriptionStatus(userId, email);
   const isPaid = subStatus === 'active';
 
   const body = await req.json();
@@ -36,13 +42,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Free tier daily limit for recipes + imports
+  // Free tier weekly limit for recipes + imports
   if (!isPaid) {
-    const today = getTodayStr();
+    const week = getThisWeekStr();
     const usage = usageMap.get(userId);
-    const todayCount = usage?.date === today ? usage.count : 0;
+    const weekCount = usage?.date === week ? usage.count : 0;
 
-    if (todayCount >= FREE_DAILY_LIMIT) {
+    if (weekCount >= FREE_DAILY_LIMIT) {
       return NextResponse.json(
         {
           error: 'free_limit_reached',
@@ -52,7 +58,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    usageMap.set(userId, { count: todayCount + 1, date: today });
+    usageMap.set(userId, { count: weekCount + 1, date: week });
   }
 
   try {
