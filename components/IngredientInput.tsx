@@ -24,7 +24,7 @@ export function IngredientInput({ ingredients, onChange, placeholder, inputId }:
       return;
     }
     if (ingredients.includes(trimmed)) { setValue(''); return; }
-    onChange([...ingredients, trimmed]);
+    onChange(Array.from(ingredients, trimmed));
     setValue('');
     setError('');
   };
