@@ -45,6 +45,17 @@ export function Nav({ activePage, onPageChange }: NavProps) {
       </div>
 
       <div className="nav-right">
+        <a
+          href="https://instagram.com/PantrifyApp"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textDecoration: 'none', padding: '5px 10px', borderRadius: 8, transition: 'all 0.15s' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#e1306c'; (e.currentTarget as HTMLAnchorElement).style.background = '#fdf2f8'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-muted)'; (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          @PantrifyApp
+        </a>
         {status !== 'loading' && (
           isPaid ? (
             <button
