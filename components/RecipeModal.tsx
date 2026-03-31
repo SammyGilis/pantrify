@@ -77,7 +77,7 @@ export function RecipeModal({ recipe, onClose, onCooked }: RecipeModalProps) {
           <div className="modal-section-title"><span>🧑</span> Ingredients</div>
           <ul className="modal-ingredients">
             {recipe.ingredients.map((ing, i) => {
-              const isMatch = matching.size > 0 && [...matching].some(m => ing.toLowerCase().includes(m));
+              const isMatch = matching.size > 0 && Array.from(matching).some(m => ing.toLowerCase().includes(m));
               return (
                 <li key={i} className={isMatch ? 'ing-matched' : ''}>
                   {ing}{isMatch && <span className="ing-check"> ✓</span>}
