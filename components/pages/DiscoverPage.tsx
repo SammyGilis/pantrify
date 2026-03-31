@@ -55,7 +55,16 @@ export function DiscoverPage({ onCooked }: Props) {
     setFilters(f => ({ ...f, diets: f.diets.includes(d) ? f.diets.filter(x => x !== d) : [...f.diets, d] }));
   };
 
-  const clearFilters = () => { setFilters({ diets: [] }); setOpenRegion(''); setDietOpen(false); };
+  const clearFilters = () => {
+    setFilters({ diets: [] });
+    setOpenRegion('');
+    setDietOpen(false);
+    setIngredients([]);
+    setInput('');
+    setRecipes([]);
+    setError('');
+    setPaywalled(false);
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -302,7 +311,16 @@ Return ONLY a valid JSON array, no markdown:
         <button className="find-btn" onClick={findRecipes} disabled={loading}>
           {loading ? '⏳ Searching…' : '🍽 Find Delicious Meals'}
         </button>
-        <button className="clear-filters-btn" onClick={clearFilters}>Clear Filters</button>
+        <button className="clear-filters-btn" onClick={() => {
+          setFilters({ diets: [] });
+          setOpenRegion('');
+          setDietOpen(false);
+          setIngredients([]);
+          setInput('');
+          setRecipes([]);
+          setError('');
+          setPaywalled(false);
+        }}>Clear All</button>
       </div>
 
       {/* No ingredients popup */}
