@@ -14,19 +14,51 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  // Log subscription events (extend this to write to your DB if needed)
-  switch (event.type) {
-    case 'customer.subscription.created':
-    case 'customer.subscription.updated':
-    case 'customer.subscription.deleted':
-      console.log(`Subscription event: ${event.type}`, event.data.object);
-      break;
-    case 'invoice.payment_succeeded':
-      console.log('Payment succeeded', event.data.object);
-      break;
-    case 'invoice.payment_failed':
-      console.log('Payment failed', event.data.object);
-      break;
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const clerkUserId = session.metadata?.clerkUserId;
+        const customerId = session.customer as string;
+
+        // Tag the Stripe customer with the Clerk user ID so we can look them up later
+        if (clerkUserId && customerId) {
+          await stripe.customers.update(customerId, {
+            metadata: { clerkUserId },
+          });
+        }
+        break;
+      }
+
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const sub = event.data.object as Stripe.Subscription;
+        const clerkUserId = sub.metadata?.clerkUserId;
+        const customerId = sub.customer as string;
+
+        // Also tag customer from subscription metadata as a backup
+        if (clerkUserId && customerId) {
+          await stripe.customers.update(customerId, {
+            metadata: { clerkUserId },
+          });
+        }
+        break;
+      }
+
+      case 'customer.subscription.deleted':
+        console.log('Subscription cancelled:', event.data.object);
+        break;
+
+      case 'invoice.payment_succeeded':
+        console.log('Payment succeeded:', event.data.object);
+        break;
+
+      case 'invoice.payment_failed':
+        console.log('Payment failed:', event.data.object);
+        break;
+    }
+  } catch (err) {
+    console.error('Webhook handler error:', err);
   }
 
   return NextResponse.json({ received: true });
