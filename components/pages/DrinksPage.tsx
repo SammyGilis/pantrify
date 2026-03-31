@@ -26,8 +26,14 @@ export function DrinksPage() {
     ...f, goals: f.goals.includes(g) ? f.goals.filter(x => x !== g) : [...f.goals, g],
   }));
 
+  const [ingError, setIngError] = useState(false);
+
   const findDrinks = async () => {
-    if (!ingredients.length) return;
+    if (!ingredients.length) {
+      setIngError(true);
+      setTimeout(() => setIngError(false), 3000);
+      return;
+    }
     setLoading(true); setError(''); setPaywalled(false); setDrinks([]);
 
     const filterParts: string[] = [];
@@ -144,11 +150,23 @@ Return ONLY a valid JSON array, no markdown:
           </div>
 
           <div className="find-btn-wrap">
-            <button className="find-btn drinks-find-btn" onClick={findDrinks} disabled={loading || !ingredients.length}>
+            <button className="find-btn drinks-find-btn" onClick={findDrinks} disabled={loading}>
               🍹 Find Drinks
             </button>
-            <button className="clear-filters-btn" onClick={() => { setFilters({ goals: [] }); setGoalsOpen(false); }}>Clear Filters</button>
+            <button className="clear-filters-btn" onClick={() => { setFilters({ goals: [] }); setGoalsOpen(false); setIngredients([]); setDrinks([]); setError(''); setPaywalled(false); }}>Clear All</button>
           </div>
+
+          {ingError && (
+            <div style={{
+              position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+              background: '#1f2937', color: 'white', borderRadius: 12,
+              padding: '14px 24px', fontSize: 14, fontWeight: 600,
+              zIndex: 9999, display: 'flex', alignItems: 'center', gap: 10,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)', whiteSpace: 'nowrap' as const,
+            }}>
+              🍹 Add at least one ingredient first!
+            </div>
+          )}
 
           {paywalled && (
             <div style={{ maxWidth: 640, margin: '0 auto 16px', padding: '0 24px' }}>
