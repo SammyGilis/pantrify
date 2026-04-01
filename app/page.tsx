@@ -38,6 +38,10 @@ export default function Home() {
     setPage('history');
   };
 
+  const handleDelete = (index: number) => {
+    setCookedRecipes(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleClear = () => {
     if (!confirm('Clear all cooked recipe history? This will also reset your Smart Grocery list.')) return;
     setCookedRecipes([]);
@@ -61,6 +65,7 @@ export default function Home() {
         <HistoryPage
           cookedRecipes={cookedRecipes}
           onClear={handleClear}
+          onDelete={handleDelete}
         />
       </div>
     </>

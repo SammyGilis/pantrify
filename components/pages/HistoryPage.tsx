@@ -9,11 +9,12 @@ import { categorize, parseIngName } from '@/lib/utils';
 interface Props {
   cookedRecipes: Recipe[];
   onClear: () => void;
+  onDelete: (index: number) => void;
 }
 
 interface GroceryItem { name: string; category: string; reason: string; }
 
-export function HistoryPage({ cookedRecipes, onClear }: Props) {
+export function HistoryPage({ cookedRecipes, onClear, onDelete }: Props) {
   const { isPaid, startCheckout } = useSubscription();
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [groceryLoading, setGroceryLoading] = useState(false);
