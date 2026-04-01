@@ -7,7 +7,7 @@ import { Drink, DrinkFilters } from '@/lib/types';
 import { extractJSONArray } from '@/lib/utils';
 import { useSubscription } from '@/hooks/useSubscription';
 
-export function DrinksPage() {
+export function DrinksPage({ onMade }: { onMade: (drink: Drink) => void }) {
   const { isPaid, startCheckout } = useSubscription();
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [filters, setFilters] = useState<DrinkFilters>({ goals: [] });
@@ -244,6 +244,9 @@ Return ONLY a valid JSON array, no markdown:
                 ))}
               </div>
             </div>
+            <button className="cooked-btn" style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', margin: '0 24px 24px' }} onClick={() => { onMade(selectedDrink); setSelectedDrink(null); }}>
+              🍹 I Made It!
+            </button>
           </div>
         </div>
       )}
