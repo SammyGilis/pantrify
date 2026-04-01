@@ -75,7 +75,7 @@ Return ONLY a valid JSON array, no markdown:
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h2 style={{ fontSize: 18, fontWeight: 700 }}>Cooking History</h2>
         {cookedRecipes.length > 0 && (
-          <button className="clear-history-btn" onClick={() => { if (confirm('Clear all history?')) { onClear(); setGroceryItems([]); } }}>
+          <button className="clear-history-btn" onClick={() => { onClear(); setGroceryItems([]); }}>
             🗑 Clear History
           </button>
         )}
@@ -96,7 +96,7 @@ Return ONLY a valid JSON array, no markdown:
                 <div className="history-card-meta">
                   <div className="history-card-meta-left">
                     <span>⏱ {r.time}</span>
-                    <span>🏷 {r.cuisine || ""} {r.meal ? `• ${r.meal}` : ''}</span>
+                    <span>🏷 {r.cuisine || r.type} {r.meal ? `• ${r.meal}` : ''}</span>
                   </div>
                   {r.cookedDate && <span className="cooked-date">Cooked {r.cookedDate}</span>}
                 </div>
