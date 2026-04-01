@@ -45,6 +45,7 @@ export interface Drink {
 export interface Filters {
   region?: string;
   country?: string;
+  countries?: string[];
   meal?: string;
   cookTime?: string;
   diets: string[];

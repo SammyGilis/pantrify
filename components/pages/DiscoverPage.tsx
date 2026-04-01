@@ -11,7 +11,7 @@ import { MACRO_PROMPT_RULES } from '@/lib/constants';
 
 const REGIONS: Record<string, string[]> = {
   europe: ['Italian','French','Spanish','Greek','British','German','Portuguese','Scandinavian','Dutch','Polish','Belgian','Swiss'],
-  'middle-east': ['Lebanese','Palestinian','Israeli','Turkish','Iranian','Jordanian','Saudi Arabian','Syrian','Iraqi','Yemeni'],
+  'middle-east': ['Lebanese','Israeli','Turkish','Iranian','Jordanian','Saudi Arabian','Syrian','Iraqi','Yemeni'],
   asia: ['Japanese','Chinese','Korean','Thai','Indian','Vietnamese'],
   africa: ['Ethiopian','Moroccan','Egyptian','Nigerian'],
   americas: ['American','Mexican','Brazilian','Peruvian','Argentinian'],
@@ -23,7 +23,7 @@ interface Props { onCooked: (r: Recipe) => void; }
 export function DiscoverPage({ onCooked }: Props) {
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [input, setInput] = useState('');
-  const [filters, setFilters] = useState<Filters>({ diets: [] });
+  const [filters, setFilters] = useState<Filters>({ diets: [], countries: [] });
   const [openRegion, setOpenRegion] = useState('');
   const [dietOpen, setDietOpen] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -120,7 +120,9 @@ export function DiscoverPage({ onCooked }: Props) {
 
     const servings = filters.servings ?? 4;
     const filterParts: string[] = [];
-    if (filters.country) filterParts.push(`Cuisine must be: ${filters.country}`);
+    if (filters.countries && filters.countries.length > 0) {
+      filterParts.push(`Cuisine must be one of: ${filters.countries.join(', ')}`);
+    } else if (filters.country) filterParts.push(`Cuisine must be: ${filters.country}`);
     else if (filters.region) filterParts.push(`Cuisine must be from region: ${filters.region}`);
     if (filters.meal) filterParts.push(`Meal type must be: ${filters.meal}`);
     if (filters.cookTime) filterParts.push(`Cook time must be ${filters.cookTime} or under`);
@@ -237,11 +239,16 @@ Return ONLY a valid JSON array, no markdown:
           <hr className="filter-sep" />
 
           <div className="filter-group">
-            <div className="filter-label">Cuisine</div>
+            <div className="filter-label">
+              Cuisine
+              {(filters.countries?.length ?? 0) > 0 && (
+                <span className="filter-dropdown-meta visible" style={{ marginLeft: 8 }}>{filters.countries!.length} selected</span>
+              )}
+            </div>
             <div className="cuisine-regions">
               {Object.keys(REGIONS).map(region => (
                 <button key={region} className={`region-pill${openRegion === region ? ' active' : ''}`}
-                  onClick={() => { setOpenRegion(openRegion === region ? '' : region); setFilters(f => ({ ...f, region: openRegion === region ? undefined : region, country: undefined })); }}>
+                  onClick={() => setOpenRegion(openRegion === region ? '' : region)}>
                   {region.charAt(0).toUpperCase() + region.slice(1).replace('-', ' ')}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9" /></svg>
                 </button>
@@ -250,9 +257,23 @@ Return ONLY a valid JSON array, no markdown:
             {openRegion && (
               <div className="sub-region-wrap open">
                 <div className="sub-region-inner">
-                  <div className="sub-region-label">{openRegion.replace('-', ' ')} — Pick a Country</div>
+                  <div className="sub-region-label">{openRegion.replace('-', ' ')} — Select cuisines (multiple allowed)</div>
                   <div className="filter-pills">
-                    {REGIONS[openRegion].map(c => pill(c, filters.country === c, () => setFilters(f => ({ ...f, country: f.country === c ? undefined : c }))))}
+                    {REGIONS[openRegion].map(c => {
+                      const selected = (filters.countries || []).includes(c);
+                      return (
+                        <button key={c}
+                          className={`filter-pill${selected ? ' active' : ''}`}
+                          onClick={() => setFilters(f => ({
+                            ...f,
+                            countries: selected
+                              ? (f.countries || []).filter(x => x !== c)
+                              : [...(f.countries || []), c]
+                          }))}>
+                          {c}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -312,7 +333,7 @@ Return ONLY a valid JSON array, no markdown:
           {loading ? '⏳ Searching…' : '🍽 Find Delicious Meals'}
         </button>
         <button className="clear-filters-btn" onClick={() => {
-          setFilters({ diets: [] });
+          setFilters({ diets: [], countries: [] });
           setOpenRegion('');
           setDietOpen(false);
           setIngredients([]);
