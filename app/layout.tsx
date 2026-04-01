@@ -5,6 +5,10 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Pantrify — Zero-Waste Cooking, Simplified',
   description: 'Find recipes using ingredients you already have.',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
