@@ -21,6 +21,8 @@ export function HistoryPage({ cookedRecipes, madeDrinks, onClear, onDelete, onCl
   const { isPaid, startCheckout } = useSubscription();
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [groceryLoading, setGroceryLoading] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [selectedDrink, setSelectedDrink] = useState<(Drink & { cookedDate?: string }) | null>(null);
 
   useEffect(() => {
     if (cookedRecipes.length >= 5 && isPaid) loadGrocery();
@@ -89,7 +91,7 @@ Return ONLY a valid JSON array, no markdown:
 
   const deleteBtn = (onClick: () => void) => (
     <button
-      onClick={onClick}
+      onClick={e => { e.stopPropagation(); onClick(); }}
       title="Remove"
       style={{ position: 'absolute' as const, top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-light)', fontSize: 16, lineHeight: 1, padding: '4px 6px', borderRadius: 6, transition: 'color 0.15s, background 0.15s' }}
       onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; (e.currentTarget as HTMLButtonElement).style.background = '#fef2f2'; }}
@@ -123,7 +125,7 @@ Return ONLY a valid JSON array, no markdown:
         ) : (
           <div style={scrollListStyle}>
             {cookedRecipes.map((r, i) => (
-              <div key={i} className="history-card" style={{ position: 'relative' }}>
+              <div key={i} className="history-card" style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setSelectedRecipe(r)}>
                 <div className="history-card-body" style={{ marginLeft: 0, paddingRight: 36 }}>
                   <h3>{r.title}</h3>
                   <p>{r.desc}</p>
@@ -165,7 +167,7 @@ Return ONLY a valid JSON array, no markdown:
         ) : (
           <div style={scrollListStyle}>
             {madeDrinks.map((d, i) => (
-              <div key={i} className="history-card" style={{ position: 'relative' }}>
+              <div key={i} className="history-card" style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setSelectedDrink(d)}>
                 <div className="history-card-body" style={{ marginLeft: 0, paddingRight: 36 }}>
                   <h3>{d.title}</h3>
                   <p>{d.desc}</p>
@@ -234,6 +236,81 @@ Return ONLY a valid JSON array, no markdown:
           </div>
         )}
       </div>
+      {/* Recipe Detail Modal */}
+      {selectedRecipe && (
+        <div className="modal-overlay open" onClick={e => { if (e.target === e.currentTarget) setSelectedRecipe(null); }}>
+          <div className="modal">
+            <div className="modal-header">
+              <button className="modal-close" onClick={() => setSelectedRecipe(null)}>✕</button>
+              <div className="modal-header-tags">
+                {selectedRecipe.cuisine && <span className="modal-header-tag">{selectedRecipe.cuisine}</span>}
+                {selectedRecipe.meal && <span className="modal-header-tag">{selectedRecipe.meal}</span>}
+                {selectedRecipe.cookedDate && <span className="modal-header-tag">Cooked {selectedRecipe.cookedDate}</span>}
+              </div>
+              <div className="modal-title">{selectedRecipe.title}</div>
+            </div>
+            <div className="modal-body">
+              <div className="modal-meta">
+                <span>⏱ {selectedRecipe.time}</span>
+                {selectedRecipe.servings && <span>👥 {selectedRecipe.servings} servings</span>}
+                <span>📋 {selectedRecipe.ingredients.length} ingredients</span>
+              </div>
+              <p className="modal-desc">{selectedRecipe.desc}</p>
+              {selectedRecipe.macros && (
+                <div className="macro-bar">
+                  <div className="macro-item"><div className="macro-val">{Math.round(selectedRecipe.macros.calories)}</div><div className="macro-label">Calories</div></div>
+                  <div className="macro-divider" />
+                  <div className="macro-item"><div className="macro-val">{Math.round(selectedRecipe.macros.protein)}g</div><div className="macro-label">Protein</div></div>
+                  <div className="macro-divider" />
+                  <div className="macro-item"><div className="macro-val">{Math.round(selectedRecipe.macros.carbs)}g</div><div className="macro-label">Carbs</div></div>
+                  <div className="macro-divider" />
+                  <div className="macro-item"><div className="macro-val">{Math.round(selectedRecipe.macros.fat)}g</div><div className="macro-label">Fat</div></div>
+                </div>
+              )}
+              <div className="modal-section-title"><span>🧑</span> Ingredients</div>
+              <ul className="modal-ingredients">
+                {selectedRecipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+              </ul>
+              <div className="modal-section-title"><span>🌿</span> Instructions</div>
+              <div className="modal-steps">
+                {selectedRecipe.steps.map((step, i) => (
+                  <div key={i} className="modal-step"><div className="modal-step-num">{i + 1}</div><div>{step}</div></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Drink Detail Modal */}
+      {selectedDrink && (
+        <div className="modal-overlay open" onClick={e => { if (e.target === e.currentTarget) setSelectedDrink(null); }}>
+          <div className="modal">
+            <div className="modal-header" style={{ background: 'linear-gradient(135deg, #1e3a5f, #2563eb)' }}>
+              <button className="modal-close" onClick={() => setSelectedDrink(null)}>✕</button>
+              <div className="modal-header-tags">
+                <span className="modal-header-tag">{selectedDrink.type}</span>
+                {selectedDrink.cookedDate && <span className="modal-header-tag">Made {selectedDrink.cookedDate}</span>}
+              </div>
+              <div className="modal-title">{selectedDrink.title}</div>
+            </div>
+            <div className="modal-body">
+              <div className="modal-meta"><span>⏱ {selectedDrink.time}</span><span>🥤 {selectedDrink.ingredients.length} ingredients</span></div>
+              <p className="modal-desc">{selectedDrink.desc}</p>
+              <div className="modal-section-title"><span>🧑</span> Ingredients</div>
+              <ul className="modal-ingredients">
+                {selectedDrink.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+              </ul>
+              <div className="modal-section-title"><span>🌿</span> Instructions</div>
+              <div className="modal-steps">
+                {selectedDrink.steps.map((step, i) => (
+                  <div key={i} className="modal-step"><div className="modal-step-num">{i + 1}</div><div>{step}</div></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
