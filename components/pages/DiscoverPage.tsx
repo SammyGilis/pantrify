@@ -33,6 +33,7 @@ export function DiscoverPage({ onCooked }: Props) {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scanMsg, setScanMsg] = useState('');
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { startCheckout } = useSubscription();
 
@@ -195,9 +196,9 @@ Return ONLY a valid JSON array, no markdown:
               onKeyDown={e => e.key === 'Enter' && addIngredient()}
             />
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => cameraInputRef.current?.click()}
               disabled={scanning}
-              title="Scan photo for ingredients"
+              title="Take a photo of your ingredients"
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 8, color: scanning ? 'var(--green-dark)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', transition: 'color 0.15s', flexShrink: 0 }}
             >
               {scanning ? (
@@ -206,8 +207,11 @@ Return ONLY a valid JSON array, no markdown:
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               )}
             </button>
+            {/* Camera input — opens camera directly */}
+            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} style={{ display: 'none' }} />
+            {/* File input — opens file picker */}
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} style={{ display: 'none' }} />
-            <button className="search-add-btn" onClick={addIngredient}>+</button>
+            <button className="search-add-btn" onClick={() => fileInputRef.current?.click()} title="Upload a photo of your ingredients">+</button>
           </div>
           {scanMsg && <div style={{ fontSize: 12, color: 'var(--green-dark)', fontWeight: 600, marginTop: 8, paddingLeft: 2 }}>✓ {scanMsg}</div>}
           {ingredients.length > 0 && (
