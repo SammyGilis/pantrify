@@ -244,7 +244,7 @@ Return ONLY a valid JSON array, no markdown:
                 ))}
               </div>
             </div>
-            <button className="cooked-btn" style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', margin: '0 24px 24px' }} onClick={() => { onMade(selectedDrink); setSelectedDrink(null); }}>
+            <button className="cooked-btn" style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', margin: '0 24px 24px', borderRadius: 12, width: 'calc(100% - 48px)' }} onClick={() => { onMade(selectedDrink); setSelectedDrink(null); }}>
               🍹 I Made It!
             </button>
           </div>
