@@ -90,18 +90,31 @@ Return ONLY a valid JSON array, no markdown:
       ) : (
         <div className="history-list" style={{ marginBottom: 32 }}>
           {cookedRecipes.map((r, i) => (
-            <div key={i} className="history-card">
-              <div className="history-card-body" style={{ marginLeft: 0 }}>
+            <div key={i} className="history-card" style={{ position: 'relative' }}>
+              <div className="history-card-body" style={{ marginLeft: 0, paddingRight: 36 }}>
                 <h3>{r.title}</h3>
                 <p>{r.desc}</p>
                 <div className="history-card-meta">
                   <div className="history-card-meta-left">
                     <span>⏱ {r.time}</span>
-                    <span>🏷 {r.cuisine || ""} {r.meal ? `• ${r.meal}` : ''}</span>
+                    <span>🏷 {r.cuisine || ''} {r.meal ? `• ${r.meal}` : ''}</span>
                   </div>
                   {r.cookedDate && <span className="cooked-date">Cooked {r.cookedDate}</span>}
                 </div>
               </div>
+              <button
+                onClick={() => onDelete(i)}
+                title="Remove from history"
+                style={{
+                  position: 'absolute', top: 12, right: 12,
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--text-light)', fontSize: 16, lineHeight: 1,
+                  padding: '4px 6px', borderRadius: 6,
+                  transition: 'color 0.15s, background 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; (e.currentTarget as HTMLButtonElement).style.background = '#fef2f2'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-light)'; (e.currentTarget as HTMLButtonElement).style.background = 'none'; }}
+              >✕</button>
             </div>
           ))}
         </div>
